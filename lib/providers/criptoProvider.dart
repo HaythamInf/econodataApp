@@ -14,21 +14,37 @@ class CriptoProvider{
     return retorno;
   }
 
-  static Future<List<CriptoList>> getCoinListLocal() async {
+  static Future<List<CriptoList>> getCoinListLocal(String busqueda, String simbol) async {
     final path = 'assets/criptos.json';
     // list dynamic to list CriptoList
     List<CriptoList> retorno = [];
     List<dynamic> criptos = jsonDecode(await ApiProvider.getJson(path));
-    for (var i = 0; i < criptos.length; i++) {
-      CriptoList cripto = CriptoList.fromJson(criptos[i]);
-      retorno.add(cripto);
+    if(busqueda != '' || simbol != ''){
+      for (var i = 0; i < criptos.length; i++) {
+        CriptoList cripto = CriptoList.fromJson(criptos[i]);
+        if(simbol != ''){
+          if(cripto.symbol == simbol){
+            retorno.add(cripto);
+          }else{
+            continue;
+          }
+        }else{
+          if (cripto.name.toLowerCase().contains(busqueda.toLowerCase())) {
+            retorno.add(cripto);
+          }else{
+            continue;
+          }    
+        }
+        
+      }
+      retorno.sort((a, b) => a.name.length.compareTo(b.name.length));
     }
     return retorno;
   }
 
-  static Future<Map<String,Object>> getCoinInfo(String id) async {
+  static Future<Map<String,dynamic>> getCoinInfo(String id) async {
     final url = '$API_COINGECKO/coins/$id';
-    Map<String,Object> retorno = jsonDecode(await ApiProvider.get(url));
+    Map<String,dynamic> retorno = jsonDecode(await ApiProvider.get(url));
     return retorno;
   }
 
